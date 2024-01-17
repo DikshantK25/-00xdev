@@ -12,6 +12,24 @@ const app = express();
 // clears every one second
 
 let numberOfRequestsForUser = {};
+
+
+
+
+// Middleware to rate limit requests
+app.use((req, res, next) => {
+  const userId = req.headers['user-id'];
+
+  // Check if the user has exceeded the limit
+  if (numberOfRequestsForUser[userId] && numberOfRequestsForUser[userId] >= 5) {
+    res.status(404).json({ error: 'Rate limit exceeded' });
+  } else {
+    // Increment the request count for the user
+    numberOfRequestsForUser[userId] = (numberOfRequestsForUser[userId] || 0) + 1;
+    next();
+  }
+});
+
 setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
